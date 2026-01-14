@@ -110,7 +110,7 @@ app.post('/message', requireApiKey, async (req: Request, res: Response) => {
   }
 
   try {
-    await transport.handlePostMessage(req, res);
+    await transport.handlePostMessage(req, res, req.body);
   } catch (error) {
     console.error(red(`Error handling message: ${error}`));
     res.status(500).json({ error: 'Internal server error' });
