@@ -1,13 +1,13 @@
 {
-  "name": "@bharathvaj/whois-mcp",
-  "version": "1.0.1",
+  "name": "whois-mcp",
+  "version": "1.0.0",
   "description": "MCP to lookup whois information",
-  "author": "Bharathvaj Ganesan",
+  "author": "",
   "license": "MIT",
-  "homepage": "https://github.com/bharathvaj-ganesan/whois-mcp",
+  "homepage": "https://github.com/gradientc/whois-mcp",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bharathvaj-ganesan/whois-mcp.git"
+    "url": "git+https://github.com/gradientc/whois-mcp.git"
   },
   "type": "module",
   "bin": {
@@ -20,17 +20,23 @@
   "scripts": {
     "build": "tsc && shx chmod +x dist/*.js",
     "prepare": "npm run build",
-    "dev": "tsc --watch"
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "start:remote": "node dist/server.js"
   },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.6.1",
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
     "whoiser": "2.0.0-beta.3",
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
     "@types/node": "^20.11.24",
     "shx": "^0.3.4",
     "typescript": "^5.3.3"

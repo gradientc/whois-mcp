@@ -2,6 +2,59 @@
 
 [Model Context Protocol](https://modelcontextprotocol.io) server for whois lookups.
 
+> Forked from [@bharathvaj/whois-mcp](https://github.com/bharathvaj-ganesan/whois-mcp) by [Bharathvaj Ganesan](https://github.com/bharathvaj-ganesan)
+
+## Remote MCP Server (for Poke, etc.)
+
+This server supports both **stdio** (local) and **HTTP/SSE** (remote) transports.
+
+### Running the Remote Server
+
+```bash
+# Install dependencies
+npm install
+
+# Build
+npm run build
+
+# Start the remote server (default port 3000)
+npm run start:remote
+
+# Or with custom port
+PORT=8080 npm run start:remote
+```
+
+### Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/` | GET | Server info and status |
+| `/sse` | GET | SSE connection for MCP clients |
+| `/message` | POST | Message endpoint for MCP communication |
+
+### Using with Poke
+
+1. Deploy this server to a public URL (e.g., Railway, Fly.io, Render)
+2. In Poke, go to **Settings → Connections → Add Integration**
+3. Click **Create** at the top
+4. Enter:
+   - **Name**: `Whois Lookup`
+   - **MCP Server URL**: `https://your-server.example.com/sse`
+   - **API Key**: (leave empty, not required)
+5. Click **Create Integration**
+
+### Docker Deployment
+
+```bash
+# Build the image
+docker build -t whois-mcp .
+
+# Run the container
+docker run -p 3000:3000 whois-mcp
+```
+
+---
+
 <a href="https://glama.ai/mcp/servers/cwu9e3fcwg">
   <img width="380" height="200" src="https://glama.ai/mcp/servers/cwu9e3fcwg/badge" alt="Whois MCP server" />
 </a>
