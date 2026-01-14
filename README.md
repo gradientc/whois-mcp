@@ -24,6 +24,16 @@ npm run start:remote
 PORT=8080 npm run start:remote
 ```
 
+### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `3000` | Server port |
+| `MAX_SESSIONS` | `100` | Maximum concurrent SSE connections |
+| `MCP_API_KEY` | (none) | API key for authentication (optional) |
+| `CORS_ORIGINS` | (all) | Comma-separated allowed origins |
+| `WHOIS_TIMEOUT` | `15000` | Timeout for WHOIS lookups (ms) |
+
 ### Endpoints
 
 | Endpoint | Method | Description |

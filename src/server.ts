@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
@@ -8,6 +8,9 @@ import { registerTools } from './tools.js';
 import { green, red, yellow, blue } from './utils.js';
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
+const MAX_SESSIONS = parseInt(process.env.MAX_SESSIONS || '100', 10);
+const CORS_ORIGINS = (process.env.CORS_ORIGINS || '').split(',').filter(Boolean);
+const API_KEY = process.env.MCP_API_KEY || '';
 
 const transports = new Map<string, SSEServerTransport>();
 
@@ -21,16 +24,33 @@ function createServer(): McpServer {
   return server;
 }
 
+function requireApiKey(req: Request, res: Response, next: NextFunction) {
+  if (!API_KEY) return next();
+  const auth = req.header('authorization') || req.header('x-api-key') || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : auth;
+  if (token !== API_KEY) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+  next();
+}
+
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+app.disable('x-powered-by');
+
+app.use(cors({
+  origin: CORS_ORIGINS.length ? CORS_ORIGINS : true,
+}));
+
+app.use(express.json({ limit: '256kb' }));
 
 app.get('/', (_req: Request, res: Response) => {
   res.json({
     name: 'Whois MCP Server',
     version: '1.0.0',
     status: 'running',
+    activeSessions: transports.size,
     endpoints: {
       sse: '/sse',
       message: '/message',
@@ -38,17 +58,29 @@ app.get('/', (_req: Request, res: Response) => {
   });
 });
 
-app.get('/sse', async (req: Request, res: Response) => {
+app.get('/sse', requireApiKey, async (req: Request, res: Response) => {
   console.log(blue('New SSE connection request'));
+
+  if (transports.size >= MAX_SESSIONS) {
+    console.log(yellow(`Session limit reached (${MAX_SESSIONS})`));
+    res.status(503).json({ error: 'Too many sessions' });
+    return;
+  }
 
   const transport = new SSEServerTransport('/message', res);
   const sessionId = transport.sessionId;
   transports.set(sessionId, transport);
 
-  transport.onclose = () => {
-    console.log(yellow(`SSE connection closed: ${sessionId}`));
+  const cleanup = () => {
     transports.delete(sessionId);
   };
+
+  transport.onclose = () => {
+    console.log(yellow(`SSE connection closed: ${sessionId}`));
+    cleanup();
+  };
+
+  req.on('close', cleanup);
 
   const server = createServer();
 
@@ -57,11 +89,12 @@ app.get('/sse', async (req: Request, res: Response) => {
     console.log(green(`SSE connection established: ${sessionId}`));
   } catch (error) {
     console.error(red(`Failed to connect SSE transport: ${error}`));
-    transports.delete(sessionId);
+    cleanup();
+    try { transport.close(); } catch {}
   }
 });
 
-app.post('/message', async (req: Request, res: Response) => {
+app.post('/message', requireApiKey, async (req: Request, res: Response) => {
   const sessionId = req.query.sessionId as string;
 
   if (!sessionId) {
@@ -88,6 +121,13 @@ const httpServer = app.listen(PORT, () => {
   console.log(green(`\n✅ Whois MCP Server running on http://localhost:${PORT}`));
   console.log(blue(`   SSE endpoint: http://localhost:${PORT}/sse`));
   console.log(blue(`   Message endpoint: http://localhost:${PORT}/message`));
+  console.log(blue(`   Max sessions: ${MAX_SESSIONS}`));
+  if (API_KEY) {
+    console.log(yellow('   API key authentication: enabled'));
+  }
+  if (CORS_ORIGINS.length) {
+    console.log(yellow(`   CORS origins: ${CORS_ORIGINS.join(', ')}`));
+  }
   console.log(yellow('\nFor Poke.com integration, use the /sse endpoint URL\n'));
 });
 
