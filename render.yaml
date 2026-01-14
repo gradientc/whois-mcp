@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: whois-mcp
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:remote
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: MAX_SESSIONS
+        value: 100
+      - key: MCP_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false

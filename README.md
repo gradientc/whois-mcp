@@ -4,6 +4,16 @@
 
 > Forked from [@bharathvaj/whois-mcp](https://github.com/bharathvaj-ganesan/whois-mcp) by [Bharathvaj Ganesan](https://github.com/bharathvaj-ganesan)
 
+## One-Click Deploy
+
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.app/new/template?template=https://github.com/gradientc/whois-mcp)
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/gradientc/whois-mcp)
+
+[![Install on Smithery](https://smithery.ai/badge/@gradientc/whois-mcp)](https://smithery.ai/server/@gradientc/whois-mcp)
+
+> **Note**: This server requires Node.js runtime (uses TCP sockets for WHOIS). Cloudflare Workers is not supported.
+
 ## Remote MCP Server (for Poke, etc.)
 
 This server supports both **stdio** (local) and **HTTP/SSE** (remote) transports.
